@@ -1,4 +1,4 @@
-<script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 
 // =====================
 // CONFIG SUPABASE
@@ -12,7 +12,7 @@ if (!window.supabase) {
 }
 
 // criar client corretamente
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 // =====================
 // LOGIN
