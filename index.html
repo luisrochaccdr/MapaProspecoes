@@ -78,15 +78,49 @@ function iniciarMapa() {
     attribution: 'Esri'
   }).addTo(map);
 
- map.on('click', async function(e) {
+ map.on('click', function(e) {
 
-  const nome = prompt("Nome do ponto:");
-  if (!nome) return;
+  const formHtml = `
+    Nome: <input id="nome"><br><br>
+    Tipo:
+    <select id="tipo">
+      <option value="Prospeção">Prospeção</option>
+      <option value="Armadilha">Armadilha</option>
+    </select><br><br>
+    Observações:<br>
+    <textarea id="obs"></textarea><br><br>
+    <button onclick="guardarPonto(${e.latlng.lat}, ${e.latlng.lng})">
+      Guardar
+    </button>
+  `;
 
-  const tipo = prompt("Tipo (Prospeção ou Armadilha):");
-  if (!tipo) return;
+  const popup = L.popup()
+    .setLatLng(e.latlng)
+    .setContent(formHtml)
+    .openOn(map);
+async function carregarPontos() {
 
-  const observacoes = prompt("Observações (opcional):");
+  const { data, error } = await supabase
+    .from('pontos')
+    .select('*');
+
+  if (error) {
+    console.log(error);
+    return;
+  }
+
+  data.forEach(p => {
+    L.marker([p.latitude, p.longitude])
+      .addTo(map)
+      .bindPopup(p.nome);
+  });
+}
+
+  async function guardarPonto(lat, lng) {
+
+  const nome = document.getElementById("nome").value;
+  const tipo = document.getElementById("tipo").value;
+  const observacoes = document.getElementById("obs").value;
 
   const user = await supabase.auth.getUser();
   const userId = user.data.user.id;
@@ -96,27 +130,29 @@ function iniciarMapa() {
     .insert([
       {
         nome: nome,
-        categoria_id: null,
-        latitude: e.latlng.lat,
-        longitude: e.latlng.lng,
+        latitude: lat,
+        longitude: lng,
         observacoes: observacoes,
         criado_por: userId
       }
-    ]);
+    ])
+    .select()
+    .single();
 
   if (error) {
-    alert("Erro ao guardar ponto: " + error.message);
+    alert("Erro: " + error.message);
     return;
   }
 
-  L.marker([e.latlng.lat, e.latlng.lng])
+  // criar marcador
+  L.marker([lat, lng])
     .addTo(map)
-    .bindPopup(nome)
-    .openPopup();
+    .bindPopup(nome);
 
-  alert("Ponto criado com sucesso!");
-});
+  map.closePopup();
+  alert("Ponto guardado!");
 }
+
 
 </script>
 
