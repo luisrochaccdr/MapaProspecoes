@@ -4,8 +4,14 @@
 // CONFIG SUPABASE
 // =====================
 const supabaseUrl = "https://qdnzywsgwhvicmogddrb.supabase.co";
-const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFkbnp5d3Nnd2h2aWNtb2dkZHJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzMjk3MDksImV4cCI6MjA5ODkwNTcwOX0.YpOvi8noV-gbcIV7U_VzC9z9UAPsFmyktzrBnosBync";
+const supabaseKey = "COLOCA_AQUI_A_TUA_ANON_KEY";
 
+// garantir que o Supabase está carregado
+if (!window.supabase) {
+  console.error("Supabase não carregado! Verifica o script CDN no <head>");
+}
+
+// criar client corretamente
 const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // =====================
@@ -52,8 +58,14 @@ function iniciarMapa() {
 
     const observacoes = prompt("Observações (opcional):");
 
-    const user = await supabase.auth.getUser();
-    const userId = user.data.user.id;
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+
+    if (userError || !userData.user) {
+      alert("Erro de login");
+      return;
+    }
+
+    const userId = userData.user.id;
 
     const { data, error } = await supabase
       .from('pontos')
