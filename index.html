@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<title>Mapa Prospecções</title>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Leaflet (mapa) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<style>
+body { margin:0; font-family:Arial; }
+#loginBox {
+  width:300px;
+  margin:100px auto;
+  padding:20px;
+  border:1px solid #ccc;
+}
+#map { height: 100vh; display:none; }
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginBox">
+  <h3>Login</h3>
+  <input id="email" placeholder="Email"><br><br>
+  <input id="password" type="password" placeholder="Password"><br><br>
+  <button onclick="login()">Entrar</button>
+  <p id="msg"></p>
+</div>
+
+<!-- MAPA -->
+<div id="map"></div>
+
+<script>
+
+// =====================
+// CONFIG SUPABASE
+// =====================
+const supabaseUrl = "COLOCA_AQUI_O_PROJECT_URL";
+const supabaseKey = "COLOCA_AQUI_A_ANON_KEY";
+
+const client = supabase.createClient(supabaseUrl, supabaseKey);
+
+// =====================
+// LOGIN
+// =====================
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const { data, error } = await client.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    document.getElementById("msg").innerText = error.message;
+  } else {
+    document.getElementById("loginBox").style.display = "none";
+    document.getElementById("map").style.display = "block";
+    iniciarMapa();
+  }
+}
+
+// =====================
+// MAPA
+// =====================
+function iniciarMapa() {
+  const map = L.map('map').setView([41.5, -6.5], 7);
+
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Esri'
+  }).addTo(map);
+
+  map.on('click', function(e) {
+    alert("Clique em: " + e.latlng.lat + ", " + e.latlng.lng);
+  });
+}
+
+</script>
+
+</body>
+</html>
